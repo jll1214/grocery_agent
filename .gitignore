@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+.DS_Store
+venv/
+*.egg-info/
+plan.json
+liste_epicerie.txt
+debug_raw_response.json

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Épicerie – Gatineau</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    header p {
+      margin-top: 6px;
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      flex: 1;
+      min-width: 180px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    input {
+      padding: 10px 14px;
+      border: 1.5px solid #dde1e9;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: #1a1a2e;
+      transition: border-color .2s;
+      width: 100%;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4f8ef7;
+    }
+
+    button#runBtn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: #4f8ef7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, opacity .2s;
+    }
+
+    button#runBtn:hover:not(:disabled) { background: #3a78e8; }
+    button#runBtn:disabled { opacity: .55; cursor: not-allowed; }
+
+    #statusBox {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    #statusBox.running { background: #fffbeb; color: #92600a; border: 1.5px solid #fcd34d; }
+    #statusBox.done    { background: #f0fdf4; color: #166534; border: 1.5px solid #86efac; }
+    #statusBox.error   { background: #fef2f2; color: #991b1b; border: 1.5px solid #fca5a5; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #resultBox {
+      display: none;
+    }
+
+    #resultBox h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    #resultText {
+      white-space: pre-wrap;
+      font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: #1a1a2e;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 18px;
+      overflow-x: auto;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 0.8rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <h1>🛒 Agent Épicerie – Gatineau</h1>
+      <p>Scrape les circulaires Flipp · Planifie 7 jours avec Claude · Optimise le budget</p>
+    </header>
+
+    <div class="card">
+      <div class="form-row">
+        <div class="field">
+          <label for="postalCode">Code postal</label>
+          <input id="postalCode" type="text" value="J8Y 3Z6" placeholder="J8Y 3Z6" maxlength="7" />
+        </div>
+        <div class="field">
+          <label for="maxFlyers">Circulaires max</label>
+          <input id="maxFlyers" type="number" value="20" min="1" max="100" />
+        </div>
+      </div>
+      <button id="runBtn" onclick="startRun()">Générer ma liste</button>
+    </div>
+
+    <div id="statusBox" role="status" aria-live="polite"></div>
+
+    <div id="resultBox" class="card">
+      <h2>Résultat</h2>
+      <pre id="resultText"></pre>
+    </div>
+
+    <footer>Données : Flipp.com · Planification : Claude (Anthropic)</footer>
+
+  </div>
+
+  <script>
+    let pollInterval = null;
+
+    function setStatus(type, html) {
+      const box = document.getElementById('statusBox');
+      box.className = type;
+      box.style.display = 'flex';
+      box.innerHTML = html;
+    }
+
+    function clearStatus() {
+      const box = document.getElementById('statusBox');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    }
+
+    function showResult(text) {
+      const box = document.getElementById('resultBox');
+      box.style.display = 'block';
+      document.getElementById('resultText').textContent = text;
+      box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function hideResult() {
+      document.getElementById('resultBox').style.display = 'none';
+    }
+
+    async function startRun() {
+      const postalCode = document.getElementById('postalCode').value.trim() || 'J8Y 3Z6';
+      const maxFlyers  = parseInt(document.getElementById('maxFlyers').value) || 20;
+      const btn        = document.getElementById('runBtn');
+
+      if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+      hideResult();
+      btn.disabled = true;
+
+      setStatus('running',
+        '<div class="spinner"></div><span>Lancement du scraping… (~3-5 min)</span>'
+      );
+
+      let jobId;
+      try {
+        const res = await fetch(
+          `/run?postal_code=${encodeURIComponent(postalCode)}&max_flyers=${maxFlyers}`,
+          { method: 'POST' }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        jobId = data.job_id;
+      } catch (err) {
+        setStatus('error', `❌ Impossible de démarrer le job : ${err.message}`);
+        btn.disabled = false;
+        return;
+      }
+
+      let dots = 0;
+      const msgs = [
+        'Récupération des circulaires Flipp…',
+        'Recherche par mots-clés (protéines, grains, légumes, bonnes graisses)…',
+        'Récupération des prix en parallèle…',
+        'Application des filtres géographiques…',
+        'Envoi à Claude pour la planification…',
+        'Génération du plan de repas (cook-once Dim→Sam)…',
+        'Formatage de la liste d\'épicerie…',
+      ];
+
+      pollInterval = setInterval(async () => {
+        dots = (dots + 1) % msgs.length;
+        setStatus('running',
+          `<div class="spinner"></div><span>⏳ ${msgs[dots]}</span>`
+        );
+
+        try {
+          const res  = await fetch(`/status/${jobId}`);
+          const data = await res.json();
+
+          if (data.status === 'done') {
+            clearInterval(pollInterval); pollInterval = null;
+            setStatus('done', '✅ Plan généré avec succès !');
+            showResult(data.result);
+            btn.disabled = false;
+
+          } else if (data.status === 'error') {
+            clearInterval(pollInterval); pollInterval = null;
+            setStatus('error', `❌ ${data.result}`);
+            btn.disabled = false;
+          }
+        } catch (err) {
+          clearInterval(pollInterval); pollInterval = null;
+          setStatus('error', `❌ Erreur de connexion : ${err.message}`);
+          btn.disabled = false;
+        }
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
