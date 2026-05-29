@@ -203,6 +203,9 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
         lines.append(f"  Sous-total {store_name}: {_p(store_total):>8}")
         lines.append("")
 
+    # ── Alignement de prix ───────────────────────────────────────────────────
+    _format_alignement_prix(lines, plan.get("alignement_prix", []))
+
     # ── Totaux ────────────────────────────────────────────────────────────────
     _header(lines, "RESUME FINANCIER")
     grand_total = plan.get("grand_total", 0.0)
@@ -224,6 +227,47 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
 
     lines.append("")
     return "\n".join(lines)
+
+
+def _format_alignement_prix(lines: list[str], items: list[dict]) -> None:
+    """Affiche les deals concurrents à demander en alignement de prix chez Maxi."""
+    if not items:
+        return
+
+    _header(lines, "ALIGNEMENT DE PRIX A DEMANDER CHEZ MAXI")
+    lines.append("  Montre ces circulaires a la caisse — Maxi aligne les prix concurrents.")
+    lines.append("")
+
+    used     = [i for i in items if i.get("used_in_plan")]
+    extra    = [i for i in items if not i.get("used_in_plan")]
+
+    if used:
+        lines.append("  [UTILISES DANS LE MENU — alignement necessaire]")
+        for it in used:
+            name    = it.get("item", "")
+            store   = it.get("store_concurrent", "")
+            price   = it.get("price", 0.0)
+            unit    = it.get("unit", "")
+            savings = it.get("savings_pct", 0)
+            note    = it.get("note", "")
+            lines.append(f"  * {name:<35} {store:<12} {_p(price)}/{unit}  (-{savings}%)")
+            if note:
+                lines.append(f"      -> {note}")
+        lines.append("")
+
+    if extra:
+        lines.append("  [BONS RABAIS SUPPLEMENTAIRES — optionnel]")
+        for it in extra:
+            name    = it.get("item", "")
+            store   = it.get("store_concurrent", "")
+            price   = it.get("price", 0.0)
+            unit    = it.get("unit", "")
+            savings = it.get("savings_pct", 0)
+            note    = it.get("note", "")
+            lines.append(f"  * {name:<35} {store:<12} {_p(price)}/{unit}  (-{savings}%)")
+            if note:
+                lines.append(f"      -> {note}")
+        lines.append("")
 
 
 def _format_cost_validation(lines: list[str], meal_plan: list[dict]) -> None:

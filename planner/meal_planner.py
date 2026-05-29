@@ -183,6 +183,24 @@ REGLES DE COUT ET DE GESTION DES INGREDIENTS
 10. BUDGET : minimiser le cout total. Les legumineuses et oeufs doivent dominer.
 
 =====================================================
+STRATEGIE D'ACHAT : TOUT AU MAXI
+=====================================================
+
+11. MAXI EN PRIORITE : Construis le menu en privilegiant EN PREMIER les
+    articles dont "store" contient "Maxi". L'objectif est de faire UNE
+    SEULE epicerie hebdomadaire chez Maxi. Si un article Maxi couvre le
+    besoin, utilise-le meme si un concurrent est legerement moins cher.
+
+12. ALIGNEMENT DE PRIX : Maxi accepte l'alignement sur les circulaires
+    concurrentes. Identifie les deals NON-Maxi (savings_pct >= 25%) qui
+    valent d'etre demandes en matching de prix chez Maxi. Inclus :
+    - Tous les items non-Maxi que tu as UTILISES dans les recettes
+      (marque used_in_plan: true) — l'utilisateur les demandera en alignement.
+    - Les meilleurs rabais concurrents NON utilises dans le menu mais
+      interessants (marque used_in_plan: false), max 4 extras.
+    Total "alignement_prix" : max 10 items, tries par savings_pct decroissant.
+
+=====================================================
 REGLES DE FORMATAGE JSON -- STRICTEMENT OBLIGATOIRES
 =====================================================
 
@@ -259,6 +277,11 @@ INSTRUCTIONS :
 
 6. Liste d'epicerie : groupee par magasin, quantites totales achetees,
    prix total du paquet (pas la fraction). Ne pas compter les leftovers deux fois.
+
+7. MAXI D'ABORD : Priorise les items "store": "Maxi" dans toutes les recettes.
+   Tout item non-Maxi utilise dans une recette DOIT apparaitre dans "alignement_prix"
+   avec used_in_plan: true. Ajoute aussi jusqu'a 4 bons rabais concurrents
+   (savings_pct >= 25%) non utilises dans le menu, avec used_in_plan: false.
 
 FORMAT JSON ATTENDU :
 {{
@@ -424,6 +447,26 @@ FORMAT JSON ATTENDU :
   ],
   "grand_total": 70.00,
   "savings_vs_regular": 28.00,
+  "alignement_prix": [
+    {{
+      "item": "Tofu ferme 450g",
+      "store_concurrent": "IGA",
+      "price": 2.49,
+      "unit": "450 g",
+      "savings_pct": 38,
+      "used_in_plan": true,
+      "note": "Utilise Mardi souper — demander alignement chez Maxi (prix regulier ~3.99$)"
+    }},
+    {{
+      "item": "Saumon Atlantique",
+      "store_concurrent": "Metro",
+      "price": 7.99,
+      "unit": "kg",
+      "savings_pct": 40,
+      "used_in_plan": false,
+      "note": "Excellent rabais non utilise cette semaine — peut remplacer la viande planifiee"
+    }}
+  ],
   "notes": "Conseils: precuire une grande quantite de riz le dimanche; variantes de sauces pour les leftovers"
 }}
 
