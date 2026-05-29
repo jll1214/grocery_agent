@@ -145,19 +145,44 @@ def health() -> dict:
 
 @app.get("/test-claude")
 def test_claude() -> dict:
-    """Test minimal de connectivité Anthropic (sans scraping)."""
+    """Diagnostic complet connectivité Anthropic."""
+    import traceback as _tb
     import anthropic as _anthropic
+    import requests as _req
     import config as _cfg
+
+    out: dict = {
+        "api_key_set": bool(_cfg.ANTHROPIC_API_KEY),
+        "api_key_prefix": (_cfg.ANTHROPIC_API_KEY[:12] + "...") if _cfg.ANTHROPIC_API_KEY else "VIDE",
+        "model": _cfg.MODEL,
+        "connectivity_requests": None,
+        "claude_status": None,
+        "claude_detail": None,
+    }
+
+    # Test 1 : joindre api.anthropic.com via requests (même lib que Flipp)
+    try:
+        r = _req.get("https://api.anthropic.com", timeout=10)
+        out["connectivity_requests"] = f"HTTP {r.status_code}"
+    except Exception as e:
+        out["connectivity_requests"] = f"FAIL {type(e).__name__}: {e}"
+
+    # Test 2 : appel Claude minimal
     try:
         client = _anthropic.Anthropic(api_key=_cfg.ANTHROPIC_API_KEY)
         resp = client.messages.create(
             model=_cfg.MODEL,
             max_tokens=20,
-            messages=[{"role": "user", "content": "Réponds uniquement: OK"}],
+            messages=[{"role": "user", "content": "Reply: OK"}],
         )
-        return {"status": "ok", "reply": resp.content[0].text.strip()}
+        out["claude_status"] = "ok"
+        out["claude_detail"] = resp.content[0].text.strip()
     except Exception as exc:
-        return {"status": "error", "detail": str(exc)}
+        out["claude_status"] = "error"
+        out["claude_detail"] = f"{type(exc).__name__}: {exc}"
+        out["traceback_tail"] = _tb.format_exc()[-1500:]
+
+    return out
 
 
 @app.post("/run")
