@@ -15,27 +15,11 @@
       padding: 24px 16px 48px;
     }
 
-    .container {
-      max-width: 700px;
-      margin: 0 auto;
-    }
+    .container { max-width: 700px; margin: 0 auto; }
 
-    header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #1a1a2e;
-    }
-
-    header p {
-      margin-top: 6px;
-      color: #555;
-      font-size: 0.95rem;
-    }
+    header { text-align: center; margin-bottom: 32px; }
+    header h1 { font-size: 1.8rem; font-weight: 700; }
+    header p  { margin-top: 6px; color: #555; font-size: 0.95rem; }
 
     .card {
       background: #fff;
@@ -45,26 +29,16 @@
       margin-bottom: 20px;
     }
 
-    .form-row {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
+    .form-row { display: flex; gap: 16px; flex-wrap: wrap; }
 
     .field {
-      flex: 1;
-      min-width: 180px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      flex: 1; min-width: 180px;
+      display: flex; flex-direction: column; gap: 6px;
     }
 
     label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #444;
-      text-transform: uppercase;
-      letter-spacing: .04em;
+      font-size: 0.85rem; font-weight: 600; color: #444;
+      text-transform: uppercase; letter-spacing: .04em;
     }
 
     input {
@@ -76,40 +50,24 @@
       transition: border-color .2s;
       width: 100%;
     }
-
-    input:focus {
-      outline: none;
-      border-color: #4f8ef7;
-    }
+    input:focus { outline: none; border-color: #4f8ef7; }
 
     button#runBtn {
-      margin-top: 20px;
-      width: 100%;
-      padding: 14px;
-      background: #4f8ef7;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s, opacity .2s;
+      margin-top: 20px; width: 100%; padding: 14px;
+      background: #4f8ef7; color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 1.05rem; font-weight: 600;
+      cursor: pointer; transition: background .2s, opacity .2s;
     }
-
     button#runBtn:hover:not(:disabled) { background: #3a78e8; }
     button#runBtn:disabled { opacity: .55; cursor: not-allowed; }
 
     #statusBox {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 18px;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 0.95rem;
+      display: none; align-items: center; gap: 10px;
+      padding: 14px 18px; border-radius: 8px;
+      font-weight: 500; font-size: 0.95rem;
       margin-bottom: 20px;
     }
-
     #statusBox.running { background: #fffbeb; color: #92600a; border: 1.5px solid #fcd34d; }
     #statusBox.done    { background: #f0fdf4; color: #166534; border: 1.5px solid #86efac; }
     #statusBox.error   { background: #fef2f2; color: #991b1b; border: 1.5px solid #fca5a5; }
@@ -122,172 +80,162 @@
       animation: spin .7s linear infinite;
       flex-shrink: 0;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    #resultBox {
-      display: none;
-    }
-
+    #resultBox { display: none; }
     #resultBox h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #444;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: .05em;
+      font-size: 1rem; font-weight: 700; color: #444;
+      margin-bottom: 12px; text-transform: uppercase; letter-spacing: .05em;
     }
-
     #resultText {
       white-space: pre-wrap;
       font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
-      font-size: 0.82rem;
-      line-height: 1.55;
-      color: #1a1a2e;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 18px;
-      overflow-x: auto;
-      max-height: 70vh;
-      overflow-y: auto;
+      font-size: 0.82rem; line-height: 1.55; color: #1a1a2e;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+      border-radius: 8px; padding: 18px;
+      overflow-x: auto; max-height: 70vh; overflow-y: auto;
     }
 
-    footer {
-      text-align: center;
-      margin-top: 32px;
-      font-size: 0.8rem;
-      color: #999;
-    }
+    footer { text-align: center; margin-top: 32px; font-size: 0.8rem; color: #999; }
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="container">
 
-    <header>
-      <h1>🛒 Agent Épicerie – Gatineau</h1>
-      <p>Scrape les circulaires Flipp · Planifie 7 jours avec Claude · Optimise le budget</p>
-    </header>
+  <header>
+    <h1>🛒 Agent Épicerie – Gatineau</h1>
+    <p>Scrape les circulaires Flipp · Planifie 7 jours avec Claude · Optimise le budget</p>
+  </header>
 
-    <div class="card">
-      <div class="form-row">
-        <div class="field">
-          <label for="postalCode">Code postal</label>
-          <input id="postalCode" type="text" value="J8Y 3Z6" placeholder="J8Y 3Z6" maxlength="7" />
-        </div>
-        <div class="field">
-          <label for="maxFlyers">Circulaires max</label>
-          <input id="maxFlyers" type="number" value="20" min="1" max="100" />
-        </div>
+  <div class="card">
+    <div class="form-row">
+      <div class="field">
+        <label for="postalCode">Code postal</label>
+        <input id="postalCode" type="text" value="J8Y 3Z6" maxlength="7" />
       </div>
-      <button id="runBtn" onclick="startRun()">Générer ma liste</button>
+      <div class="field">
+        <label for="maxFlyers">Circulaires max</label>
+        <input id="maxFlyers" type="number" value="5" min="1" max="30" />
+      </div>
     </div>
-
-    <div id="statusBox" role="status" aria-live="polite"></div>
-
-    <div id="resultBox" class="card">
-      <h2>Résultat</h2>
-      <pre id="resultText"></pre>
-    </div>
-
-    <footer>Données : Flipp.com · Planification : Claude (Anthropic)</footer>
-
+    <button id="runBtn" onclick="startRun()">Générer ma liste</button>
   </div>
 
-  <script>
-    let pollInterval = null;
+  <div id="statusBox" role="status" aria-live="polite"></div>
 
-    function setStatus(type, html) {
-      const box = document.getElementById('statusBox');
-      box.className = type;
-      box.style.display = 'flex';
-      box.innerHTML = html;
-    }
+  <div id="resultBox" class="card">
+    <h2>Résultat</h2>
+    <pre id="resultText"></pre>
+  </div>
 
-    function clearStatus() {
-      const box = document.getElementById('statusBox');
-      box.style.display = 'none';
-      box.innerHTML = '';
-    }
+  <footer>Données : Flipp.com · Planification : Claude (Anthropic)</footer>
 
-    function showResult(text) {
-      const box = document.getElementById('resultBox');
-      box.style.display = 'block';
-      document.getElementById('resultText').textContent = text;
-      box.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+</div>
+<script>
+  let pollInterval = null;
+  let currentJobId  = null;
 
-    function hideResult() {
-      document.getElementById('resultBox').style.display = 'none';
-    }
+  const STEPS = [
+    "Récupération des circulaires Flipp…",
+    "Recherche par mots-clés (protéines, grains, légumes, bonnes graisses)…",
+    "Récupération des prix en parallèle…",
+    "Application des filtres géographiques…",
+    "Envoi à Claude pour la planification…",
+    "Génération du plan de repas (cook-once Dim→Sam)…",
+    "Formatage de la liste d'épicerie…",
+  ];
+  let stepIdx = 0;
 
-    async function startRun() {
-      const postalCode = document.getElementById('postalCode').value.trim() || 'J8Y 3Z6';
-      const maxFlyers  = parseInt(document.getElementById('maxFlyers').value) || 20;
-      const btn        = document.getElementById('runBtn');
+  function setStatus(type, html) {
+    const box = document.getElementById('statusBox');
+    box.className = type;
+    box.style.display = 'flex';
+    box.innerHTML = html;
+  }
 
-      if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
-      hideResult();
-      btn.disabled = true;
+  function showResult(text) {
+    const box = document.getElementById('resultBox');
+    box.style.display = 'block';
+    document.getElementById('resultText').textContent = text;
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
-      setStatus('running',
-        '<div class="spinner"></div><span>Lancement du scraping… (~3-5 min)</span>'
+  function reset() {
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    document.getElementById('runBtn').disabled = false;
+  }
+
+  async function startRun() {
+    const postalCode = document.getElementById('postalCode').value.trim() || 'J8Y 3Z6';
+    const maxFlyers  = parseInt(document.getElementById('maxFlyers').value) || 5;
+    const btn        = document.getElementById('runBtn');
+
+    // Bloquer immédiatement
+    btn.disabled = true;
+    document.getElementById('resultBox').style.display = 'none';
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    stepIdx = 0;
+
+    setStatus('running', '<div class="spinner"></div><span>Démarrage…</span>');
+
+    // Lancer le job
+    let jobId;
+    try {
+      const res = await fetch(
+        `/run?postal_code=${encodeURIComponent(postalCode)}&max_flyers=${maxFlyers}`,
+        { method: 'POST' }
       );
-
-      let jobId;
-      try {
-        const res = await fetch(
-          `/run?postal_code=${encodeURIComponent(postalCode)}&max_flyers=${maxFlyers}`,
-          { method: 'POST' }
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        jobId = data.job_id;
-      } catch (err) {
-        setStatus('error', `❌ Impossible de démarrer le job : ${err.message}`);
+      if (res.status === 429) {
+        setStatus('error', '⏳ Un job est déjà en cours sur le serveur. Attends qu\'il se termine.');
         btn.disabled = false;
         return;
       }
-
-      let dots = 0;
-      const msgs = [
-        'Récupération des circulaires Flipp…',
-        'Recherche par mots-clés (protéines, grains, légumes, bonnes graisses)…',
-        'Récupération des prix en parallèle…',
-        'Application des filtres géographiques…',
-        'Envoi à Claude pour la planification…',
-        'Génération du plan de repas (cook-once Dim→Sam)…',
-        'Formatage de la liste d\'épicerie…',
-      ];
-
-      pollInterval = setInterval(async () => {
-        dots = (dots + 1) % msgs.length;
-        setStatus('running',
-          `<div class="spinner"></div><span>⏳ ${msgs[dots]}</span>`
-        );
-
-        try {
-          const res  = await fetch(`/status/${jobId}`);
-          const data = await res.json();
-
-          if (data.status === 'done') {
-            clearInterval(pollInterval); pollInterval = null;
-            setStatus('done', '✅ Plan généré avec succès !');
-            showResult(data.result);
-            btn.disabled = false;
-
-          } else if (data.status === 'error') {
-            clearInterval(pollInterval); pollInterval = null;
-            setStatus('error', `❌ ${data.result}`);
-            btn.disabled = false;
-          }
-        } catch (err) {
-          clearInterval(pollInterval); pollInterval = null;
-          setStatus('error', `❌ Erreur de connexion : ${err.message}`);
-          btn.disabled = false;
-        }
-      }, 3000);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      jobId = data.job_id;
+      currentJobId = jobId;
+    } catch (err) {
+      setStatus('error', `❌ Impossible de démarrer : ${err.message}`);
+      btn.disabled = false;
+      return;
     }
-  </script>
+
+    // Polling toutes les 3 secondes
+    pollInterval = setInterval(async () => {
+      // Avancer le message d'étape
+      stepIdx = (stepIdx + 1) % STEPS.length;
+
+      try {
+        const res  = await fetch(`/status/${jobId}`);
+        const data = await res.json();
+
+        // Afficher l'étape serveur si disponible, sinon message générique
+        const stepMsg = data.step || STEPS[stepIdx];
+
+        if (data.status === 'done') {
+          clearInterval(pollInterval); pollInterval = null;
+          setStatus('done', '✅ Plan généré avec succès !');
+          showResult(data.result);
+          btn.disabled = false;
+
+        } else if (data.status === 'error') {
+          clearInterval(pollInterval); pollInterval = null;
+          setStatus('error', `❌ ${data.result}`);
+          btn.disabled = false;
+
+        } else {
+          // Encore en cours
+          setStatus('running', `<div class="spinner"></div><span>⏳ ${stepMsg}</span>`);
+        }
+
+      } catch (err) {
+        // Erreur réseau ponctuelle — on continue à poller
+        setStatus('running',
+          `<div class="spinner"></div><span>⏳ Connexion instable, on réessaie…</span>`
+        );
+      }
+    }, 3000);
+  }
+</script>
 </body>
 </html>

@@ -7,11 +7,11 @@ GET  /health   → healthcheck Render
 
 from __future__ import annotations
 
-import sys
+import threading
 import uuid
 from typing import Any
 
-from fastapi import BackgroundTasks, FastAPI
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -37,18 +37,31 @@ app.add_middleware(
 # Stockage en mémoire des jobs
 jobs: dict[str, dict[str, Any]] = {}
 
+# Verrou : 1 seul job à la fois (mémoire limitée sur Render free)
+_job_lock = threading.Lock()
+
 # ---------------------------------------------------------------------------
 # Background job
 # ---------------------------------------------------------------------------
 
 def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
+    acquired = _job_lock.acquire(blocking=False)
+    if not acquired:
+        jobs[job_id] = {
+            "status": "error",
+            "result": "Un autre job est déjà en cours. Attends qu'il se termine et réessaie.",
+        }
+        return
+
     try:
         # Étape 1 : scraping
+        jobs[job_id]["step"] = "Scraping Flipp..."
         scraper = FlippScraper(postal_code=postal_code)
         deals = scraper.get_all_deals(max_flyers=max_flyers)
 
         # Étape 2 : filtres géo + rabais fruits/légumes
-        filtered, _ = apply_filters(
+        jobs[job_id]["step"] = "Application des filtres..."
+        filtered, stats = apply_filters(
             deals,
             nearby_stores=config.NEARBY_GROCERY_STORES,
             veg_fruit_min_savings_pct=config.VEG_FRUIT_MIN_SAVINGS_PCT,
@@ -57,11 +70,12 @@ def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
         if not filtered:
             jobs[job_id] = {
                 "status": "error",
-                "result": "Aucun deal trouvé après filtres. Vérifiez NEARBY_GROCERY_STORES dans config.py.",
+                "result": "Aucun deal trouvé après filtres.",
             }
             return
 
         # Étape 3 : planification Claude
+        jobs[job_id]["step"] = f"Planification Claude ({stats['final']} deals)..."
         plan = MealPlanner().plan(filtered)
 
         # Étape 4 : formatage
@@ -72,6 +86,9 @@ def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
     except Exception as exc:
         jobs[job_id] = {"status": "error", "result": f"Erreur: {exc}"}
 
+    finally:
+        _job_lock.release()
+
 
 # ---------------------------------------------------------------------------
 # Routes
@@ -79,7 +96,8 @@ def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok"}
+    running = any(j["status"] == "running" for j in jobs.values())
+    return {"status": "ok", "job_running": running}
 
 
 @app.post("/run")
@@ -88,8 +106,14 @@ def run(
     postal_code: str = config.POSTAL_CODE,
     max_flyers: int = config.MAX_FLYERS,
 ) -> dict:
+    # Rejeter si un job tourne déjà
+    if any(j["status"] == "running" for j in jobs.values()):
+        raise HTTPException(
+            status_code=429,
+            detail="Un job est déjà en cours. Attends qu'il se termine.",
+        )
     job_id = str(uuid.uuid4())
-    jobs[job_id] = {"status": "running", "result": None}
+    jobs[job_id] = {"status": "running", "result": None, "step": "Démarrage..."}
     background_tasks.add_task(_run_job, job_id, postal_code, max_flyers)
     return {"job_id": job_id}
 
@@ -98,7 +122,7 @@ def run(
 def status(job_id: str) -> dict:
     job = jobs.get(job_id)
     if job is None:
-        return {"status": "error", "result": "Job introuvable."}
+        return {"status": "error", "result": "Job introuvable (serveur redémarré ?)."}
     return job
 
 
