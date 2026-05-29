@@ -1,14 +1,15 @@
 """
 FastAPI server – Agent Épicerie Gatineau
-POST /run      → lance le scraping + planification en arrière-plan
+POST /run            → lance le scraping + planification en arrière-plan
 GET  /status/{job_id} → résultat ou statut en cours
-GET  /health   → healthcheck Render
+GET  /health         → healthcheck Render
 """
 
 from __future__ import annotations
 
 import threading
 import uuid
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import Any
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
@@ -37,8 +38,12 @@ app.add_middleware(
 # Stockage en mémoire des jobs
 jobs: dict[str, dict[str, Any]] = {}
 
-# Verrou : 1 seul job à la fois (mémoire limitée sur Render free)
+# 1 seul job à la fois (mémoire limitée sur Render free)
 _job_lock = threading.Lock()
+
+# Timeouts
+SCRAPE_TIMEOUT_SEC  = 600   # 10 min max pour le scraping
+CLAUDE_TIMEOUT_SEC  = 300   #  5 min max pour l'appel Claude
 
 # ---------------------------------------------------------------------------
 # Background job
@@ -49,23 +54,35 @@ def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
     if not acquired:
         jobs[job_id] = {
             "status": "error",
-            "result": "Un autre job est déjà en cours. Attends qu'il se termine et réessaie.",
+            "result": "Un job est déjà en cours. Attends qu'il se termine.",
         }
         return
 
     try:
-        # Étape 1 : scraping
-        jobs[job_id]["step"] = "Scraping Flipp..."
-        scraper = FlippScraper(postal_code=postal_code)
-        deals = scraper.get_all_deals(max_flyers=max_flyers)
+        # ── Étape 1 : scraping avec timeout ──────────────────────────────
+        jobs[job_id]["step"] = "Scraping Flipp (2-3 min)..."
+        print(f"[{job_id[:8]}] Démarrage scraping postal={postal_code} max_flyers={max_flyers}")
 
-        # Étape 2 : filtres géo + rabais fruits/légumes
-        jobs[job_id]["step"] = "Application des filtres..."
+        with ThreadPoolExecutor(max_workers=1) as ex:
+            future = ex.submit(
+                lambda: FlippScraper(postal_code=postal_code).get_all_deals(max_flyers=max_flyers)
+            )
+            try:
+                deals = future.result(timeout=SCRAPE_TIMEOUT_SEC)
+            except FuturesTimeout:
+                jobs[job_id] = {"status": "error", "result": "Timeout scraping (10 min dépassées)."}
+                return
+
+        print(f"[{job_id[:8]}] {len(deals)} deals bruts")
+
+        # ── Étape 2 : filtres ────────────────────────────────────────────
+        jobs[job_id]["step"] = "Filtres géographiques..."
         filtered, stats = apply_filters(
             deals,
             nearby_stores=config.NEARBY_GROCERY_STORES,
             veg_fruit_min_savings_pct=config.VEG_FRUIT_MIN_SAVINGS_PCT,
         )
+        print(f"[{job_id[:8]}] {stats['final']} deals après filtres")
 
         if not filtered:
             jobs[job_id] = {
@@ -74,17 +91,36 @@ def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
             }
             return
 
-        # Étape 3 : planification Claude
-        jobs[job_id]["step"] = f"Planification Claude ({stats['final']} deals)..."
-        plan = MealPlanner().plan(filtered)
+        # ── Étape 3 : Claude avec timeout ────────────────────────────────
+        jobs[job_id]["step"] = f"Claude planifie le menu ({stats['final']} deals)..."
+        print(f"[{job_id[:8]}] Envoi à Claude...")
 
-        # Étape 4 : formatage
+        with ThreadPoolExecutor(max_workers=1) as ex:
+            future = ex.submit(MealPlanner().plan, filtered)
+            try:
+                plan = future.result(timeout=CLAUDE_TIMEOUT_SEC)
+            except FuturesTimeout:
+                jobs[job_id] = {
+                    "status": "error",
+                    "result": (
+                        f"Timeout Claude ({CLAUDE_TIMEOUT_SEC}s dépassées). "
+                        "L'API Anthropic met trop de temps à répondre. Réessaie dans quelques minutes."
+                    ),
+                }
+                return
+
+        print(f"[{job_id[:8]}] Plan reçu de Claude")
+
+        # ── Étape 4 : formatage ──────────────────────────────────────────
+        jobs[job_id]["step"] = "Formatage de la liste..."
         output = format_grocery_list(plan)
 
         jobs[job_id] = {"status": "done", "result": output}
+        print(f"[{job_id[:8]}] Terminé ✓")
 
     except Exception as exc:
-        jobs[job_id] = {"status": "error", "result": f"Erreur: {exc}"}
+        print(f"[{job_id[:8]}] ERREUR: {exc}")
+        jobs[job_id] = {"status": "error", "result": f"Erreur inattendue: {exc}"}
 
     finally:
         _job_lock.release()
@@ -96,8 +132,8 @@ def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
 
 @app.get("/health")
 def health() -> dict:
-    running = any(j["status"] == "running" for j in jobs.values())
-    return {"status": "ok", "job_running": running}
+    running = [jid for jid, j in jobs.items() if j["status"] == "running"]
+    return {"status": "ok", "jobs_running": len(running)}
 
 
 @app.post("/run")
@@ -106,7 +142,6 @@ def run(
     postal_code: str = config.POSTAL_CODE,
     max_flyers: int = config.MAX_FLYERS,
 ) -> dict:
-    # Rejeter si un job tourne déjà
     if any(j["status"] == "running" for j in jobs.values()):
         raise HTTPException(
             status_code=429,
@@ -122,12 +157,15 @@ def run(
 def status(job_id: str) -> dict:
     job = jobs.get(job_id)
     if job is None:
-        return {"status": "error", "result": "Job introuvable (serveur redémarré ?)."}
+        return {
+            "status": "error",
+            "result": "Job introuvable — le serveur a probablement redémarré. Relance une génération.",
+        }
     return job
 
 
 # ---------------------------------------------------------------------------
-# Static files (après les routes pour ne pas masquer /health etc.)
+# Static (après les routes API)
 # ---------------------------------------------------------------------------
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
