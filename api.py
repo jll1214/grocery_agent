@@ -7,6 +7,7 @@ GET  /health         → healthcheck Render
 
 from __future__ import annotations
 
+import gc
 import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
@@ -91,7 +92,13 @@ def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
             }
             return
 
-        # ── Étape 3 : Claude avec timeout ────────────────────────────────
+        # ── Étape 3 : libération mémoire avant appel Claude ──────────────
+        deal_count = len(deals)
+        del deals
+        gc.collect()
+        print(f"[{job_id[:8]}] Mémoire libérée (deals supprimés), envoi Claude...")
+
+        # ── Étape 4 : Claude avec timeout ────────────────────────────────
         jobs[job_id]["step"] = f"Claude planifie le menu ({stats['final']} deals)..."
         print(f"[{job_id[:8]}] Envoi à Claude...")
 
@@ -134,6 +141,23 @@ def _run_job(job_id: str, postal_code: str, max_flyers: int) -> None:
 def health() -> dict:
     running = [jid for jid, j in jobs.items() if j["status"] == "running"]
     return {"status": "ok", "jobs_running": len(running)}
+
+
+@app.get("/test-claude")
+def test_claude() -> dict:
+    """Test minimal de connectivité Anthropic (sans scraping)."""
+    import anthropic as _anthropic
+    import config as _cfg
+    try:
+        client = _anthropic.Anthropic(api_key=_cfg.ANTHROPIC_API_KEY)
+        resp = client.messages.create(
+            model=_cfg.MODEL,
+            max_tokens=20,
+            messages=[{"role": "user", "content": "Réponds uniquement: OK"}],
+        )
+        return {"status": "ok", "reply": resp.content[0].text.strip()}
+    except Exception as exc:
+        return {"status": "error", "detail": str(exc)}
 
 
 @app.post("/run")
