@@ -174,18 +174,39 @@ OBJECTIF CALORIQUE ET MACRONUTRIMENTS
 =====================================================
 
 CIBLE : 2200 kcal/jour en moyenne (sur 7 jours).
-  Repartition cible par repas :
-    Dejeuner  : ~550 kcal
-    Diner     : ~700 kcal  (leftovers = idem souper veille)
-    Souper    : ~950 kcal  (portions x2, donc 1900 kcal cuisinaees au total)
+
+  REPARTITION COHERENTE (le diner EST le leftover du souper — memes kcal) :
+    Dejeuner  : ~600 kcal par portion
+    Diner     : ~800 kcal par portion  (= exactement les kcal du souper de la veille)
+    Souper    : ~800 kcal par portion  (cuisine x2 = 1600 kcal total en cuisine)
+    Total/jour : ~600 + ~800 + ~800 = ~2200 kcal
+
+  TAILLES DE PORTIONS MINIMALES pour atteindre les cibles :
+    Dejeuner (~600 kcal) :
+      Option gruau : 100 g avoine seche (380 kcal) + 175 g yogourt grec (100 kcal)
+                     + 30 g noix/graines (170 kcal) + fruits = ~650 kcal
+      Option oeufs : 3 oeufs (235 kcal) + 2 tranches pain (140 kcal)
+                     + 30 g beurre arachide (188 kcal) + fruits = ~563 kcal
+    Souper (~800 kcal/portion, done 1600 kcal pour 2) :
+      200 g proteine cuite (300-400 kcal) + 300 g grain cuit (300-350 kcal)
+      + 200 g legumes (60-100 kcal) + 20 ml huile (180 kcal) + sauce (50 kcal)
+      = environ 900-1080 kcal pour 2 portions = 450-540 kcal/portion
+      -> Augmenter le grain a 400 g cuit et la proteine a 250 g si necessaire.
+
+  VALIDATION OBLIGATOIRE AVANT DE PRODUIRE LE JSON :
+    Pour chaque journee, calcule mentalement :
+      breakfast.kcal + lunch.kcal + dinner.kcal doit etre entre 1900 et 2400 kcal.
+    Si une journee est en dehors de cette fourchette, augmente les portions.
+    Le champ weekly_nutrition_summary.avg_daily_kcal DOIT etre la moyenne
+    arithmetique reelle des 7 totaux journaliers calcules depuis les macros
+    individuelles. INTERDIT de fabriquer ce nombre.
 
 MACROS CIBLES (flexibles, ecart +/- 10% accepte) :
     Glucides  : ~50% des kcal  (~275 g/jour)
     Lipides   : ~20% des kcal  (~49 g/jour)
     Proteines : ~30% des kcal  (~165 g/jour)
   Ces pourcentages sont des guides, pas des contraintes rigides.
-  Privilegie la satiete, la variete et les aliments entiers.
-  Dans le JSON, rapporte les macros reelles calculees (pas les cibles).
+  Dans le JSON, rapporte les macros reelles calculees depuis les ingredients.
 
 =====================================================
 REGLES NUTRITIONNELLES
@@ -530,7 +551,8 @@ FORMAT JSON ATTENDU :
     "avg_daily_fat_g": 49,
     "avg_daily_carb_g": 275,
     "avg_daily_fiber_g": 35,
-    "avg_daily_kcal": 2200,
+    "avg_daily_kcal": 2187,
+    "note_calcul_kcal": "Somme reelle des 7 jours : (j1_total + j2_total + ... + j7_total) / 7",
     "protein_pct_kcal": 30,
     "fat_pct_kcal": 20,
     "carb_pct_kcal": 50,

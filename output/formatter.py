@@ -191,12 +191,26 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
         carb  = weekly.get("avg_daily_carb_g", 0)
         fiber = weekly.get("avg_daily_fiber_g", 0)
 
-        # Calories avec écart vs cible 2200
-        kcal_flag = ""
-        if isinstance(kcal, (int, float)) and kcal > 0:
-            diff = kcal - 2200
-            kcal_flag = f"  ({'+' if diff >= 0 else ''}{diff:.0f} vs cible 2200)"
-        lines.append(f"  Calories moy./jour     : {kcal} kcal{kcal_flag}")
+        # Recalcul réel depuis les macros individuelles
+        real_daily: list[float] = []
+        for day_data in plan.get("meal_plan", []):
+            day_total = 0.0
+            for meal_key in ("breakfast", "lunch", "dinner"):
+                m = day_data.get(meal_key, {})
+                k = m.get("macros", {}).get("kcal")
+                if isinstance(k, (int, float)):
+                    day_total += k
+            if day_total > 0:
+                real_daily.append(day_total)
+        real_avg = round(sum(real_daily) / len(real_daily)) if real_daily else 0
+
+        # Affichage avec détection de fabrication
+        reported = kcal if isinstance(kcal, (int, float)) else 0
+        diff_vs_target = reported - 2200
+        flag_target = f"  ({'+' if diff_vs_target >= 0 else ''}{diff_vs_target:.0f} vs cible 2200)"
+        lines.append(f"  Calories moy./jour     : {real_avg} kcal (recalcule)  {flag_target if reported else ''}")
+        if real_avg > 0 and reported > 0 and abs(real_avg - reported) > 150:
+            lines.append(f"  [!] Ecart : Claude a rapporte {reported} kcal mais somme reelle = {real_avg} kcal")
 
         # Macros avec % des kcal calculé si possible
         def _macro_pct(g: float, cal_per_g: float) -> str:
