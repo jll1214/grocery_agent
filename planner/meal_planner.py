@@ -207,6 +207,49 @@ REGLES NUTRITIONNELLES
    50% assiette = legumes et fruits | 25% = grains entiers | 25% = proteines
 
 =====================================================
+GARDE-MANGER — LISTE FIXE (toujours disponible a la maison)
+=====================================================
+
+Ces articles sont TOUJOURS disponibles. Ne les ajoute JAMAIS a la liste
+d'epicerie. Tu peux les utiliser librement dans les recettes avec "store":
+"garde-manger" dans les ingredients.
+
+LEGUMES ET FRUITS CONGELES (base de la majorite des repas) :
+  Melanges de legumes surgeles (brocoli, caulifleur, pois, mais, haricots verts,
+  epinards congeles, melanges asiatiques, etc.)
+  Fruits congeles (fruits rouges, mangue, peches, bananes)
+  -> REGLE : utilise des congelés par défaut pour la majorite des legumes/fruits.
+     N'utilise des FRAIS que si un article apparait dans la liste de rabais
+     ci-dessous (>= 20% de rabais). Ne compte pas les congeles dans la limite
+     des 6 fruits/legumes frais.
+
+PROTEINES DE BASE :
+  Oeufs (grande (grand format toujours disponible)
+
+PAIN ET GRAINS :
+  Pain de ble entier (tranches, format standard)
+
+HUILES ET MATIERES GRASSES :
+  Huile d'olive, huile de canola
+
+CONDIMENTS ET SAUCES :
+  Sauce soja, vinaigre blanc, vinaigre de cidre, moutarde de Dijon
+
+EPICES ET HERBES SECHES :
+  Sel, poivre noir, cumin, paprika, curcuma, origan, thym, cannelle,
+  flocons de piment rouge, ail en poudre, oignon en poudre
+
+AROMATICS FRAIS (toujours en stock) :
+  Ail (gousses), oignon jaune
+
+DIVERS :
+  Bouillon de poulet ou de legumes (cube ou carton),
+  fecule de mais, sucre, farine tout-usage
+
+IMPORTANT : Tout ingredient NON dans cette liste doit apparaitre
+dans la liste d'epicerie, meme s'il semble courant.
+
+=====================================================
 REGLES DE COUT ET DE GESTION DES INGREDIENTS
 =====================================================
 
@@ -274,9 +317,12 @@ Voici les rabais disponibles cette semaine a Gatineau (code postal J8Y 3Z6).
 CONTEXTE :
 - Epiceries dans un rayon de 4.30 km de la rue Laroche uniquement.
 - Legumes/fruits listes = uniquement ceux avec >= 20% de rabais.
-  Les legumes courants (carottes, oignons, etc.) sont dans le garde-manger ou
-  achetes au prix courant — utilise-les librement dans les recettes mais ne les
-  ajoute PAS a la liste d'epicerie sauf s'ils apparaissent ci-dessous.
+  STRATEGIE LEGUMES/FRUITS : utilise les CONGELES du garde-manger pour la
+  majorite des repas. Utilise les FRAIS uniquement si un article apparait
+  dans la liste ci-dessous (bon rabais). Les congeles ne sont JAMAIS dans
+  la liste d'epicerie et ne comptent pas dans la limite des 6 frais.
+- Les oeufs et le pain sont toujours disponibles (garde-manger) — ne pas
+  les ajouter a la liste d'epicerie sauf si un format special est en rabais.
 - Le champ "unit" indique la contenance totale du paquet (ex: "5 kg", "900 g").
   Utilise-le pour calculer le cout alloue proportionnel a chaque recette.
 
