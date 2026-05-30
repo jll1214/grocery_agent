@@ -110,41 +110,64 @@ La semaine commence le DIMANCHE (Jour 1) et se termine le SAMEDI (Jour 7) :
   Jour 1 = Dimanche | Jour 2 = Lundi | Jour 3 = Mardi | Jour 4 = Mercredi
   Jour 5 = Jeudi    | Jour 6 = Vendredi | Jour 7 = Samedi
 
-SOUPER -> DINER DU LENDEMAIN (chaine ininterrompue) :
-  Le souper de chaque jour est cuisine EN DOUBLE PORTION.
-  Ce souper double DEVIENT AUTOMATIQUEMENT le diner du jour suivant.
-  Le diner-leftover ne necessite AUCUNE preparation (rechauffer 5 min seulement).
+MAXIMUM 2 SESSIONS DE CUISINE PAR SEMAINE — REGLE ABSOLUE :
+  Seuls 2 moments impliquent de la VRAIE cuisine (cuisson au feu/four) :
+    SESSION 1 : Dimanche (obligatoire, 2-3 h) — batch cooking complet
+    SESSION 2 : Mardi ou Mercredi soir (optionnel, 30-45 min) — rafraichissement
 
-  Dimanche souper x2    -> Lundi diner     (leftover, 0 prep)
-  Lundi souper x2       -> Mardi diner     (leftover, 0 prep)
-  Mardi souper x2       -> Mercredi diner  (leftover, 0 prep)
-  Mercredi souper x2    -> Jeudi diner     (leftover, 0 prep)
-  Jeudi souper x2       -> Vendredi diner  (leftover, 0 prep)
-  Vendredi souper x2    -> Samedi diner    (leftover, 0 prep)
-  Samedi souper         -> repas weekend (pas de doublement requis)
+  Tous les autres soirs = ASSEMBLAGE UNIQUEMENT (< 10 min) :
+    Combiner des composants pre-cuits du dimanche + sauce/epices differentes.
+    Rechauffer au besoin. ZERO cuisson reelle.
+
+SOUPER -> DINER DU LENDEMAIN (chaine ininterrompue) :
+  Chaque souper est prepare EN DOUBLE PORTION (assemblage x2).
+  Ce double DEVIENT AUTOMATIQUEMENT le diner du jour suivant (rechauffer 5 min).
+
+  Dimanche souper x2  [CUISINE]    -> Lundi diner     (leftover, 0 prep)
+  Lundi souper x2     [ASSEMBLAGE] -> Mardi diner     (leftover, 0 prep)
+  Mardi souper x2     [ASSEMBLAGE ou SESSION 2] -> Mercredi diner
+  Mercredi souper x2  [ASSEMBLAGE ou SESSION 2] -> Jeudi diner
+  Jeudi souper x2     [ASSEMBLAGE] -> Vendredi diner  (leftover, 0 prep)
+  Vendredi souper x2  [ASSEMBLAGE] -> Samedi diner    (leftover, 0 prep)
+  Samedi souper       [ASSEMBLAGE] -> repas weekend (pas de doublement)
 
 COUT DES REPAS LEFTOVER :
   Le diner-leftover a un cost = 0 $ et cost_per_portion = 0 $.
   Il est deja comptabilise dans le souper du jour precedent.
   Le souper x2 doit montrer cost = cout TOTAL pour 2 portions.
   cost_per_portion du souper = cost / 2.
-  Le grand_total NE compte pas les diners-leftovers (cout deja inclus dans les soupers).
+  Le grand_total NE compte pas les diners-leftovers.
 
 =====================================================
-BATCH COOKING DU DIMANCHE
+SESSION 1 : BATCH COOKING DU DIMANCHE (obligatoire)
 =====================================================
 
-Le Dimanche est la grande journee de preparation de la semaine.
-Planifie une session de cuisine structuree incluant :
-  - Cuisson des grains de base pour 3-4 jours (riz brun, quinoa, avoine)
-  - Cuisson des legumienses pour 2-3 jours (lentilles, pois chiches, haricots)
-  - Preparation du souper du Dimanche x2 (-> Lundi diner)
-  - Optionnel : preparation d'une soupe ou ragout supplementaire si gros format
+Le Dimanche, cuisiner EN UNE SEULE FOIS tous les composants de base
+qui seront ASSEMBLES differemment chaque soir de la semaine :
 
-Si le menu necessite une mise a jour mi-semaine (ex : ingredients frais a consommer,
-nouveau lot de grains), planifie une session courte le Mardi ou Mercredi soir (30-45 min).
-Recommande l'option A (tout le dimanche) ou l'option B (dimanche + mi-semaine) selon
-la complexite du menu et la presence de gros formats a ecouler.
+  PROTEINES (cuire tout le dimanche) :
+    - Proteine animale principale (ex : cuire 1.5 kg de poulet, roles ou poeles)
+    - Legumineuses (ex : 2 boites de pois chiches + 400 g lentilles)
+    - Si 2e proteine prevue mi-semaine -> laisser pour SESSION 2
+
+  GRAINS (cuire en grande quantite) :
+    - Grain principal pour 4-5 jours (ex : 600 g riz brun cru -> ~1.8 kg cuit)
+    - Grain secondaire si applicable (ex : 300 g quinoa cru -> ~900 g cuit)
+
+  SAUCES / BASES AROMATIQUES (2-3 sauces differentes) :
+    - Chaque soir, la meme proteine + le meme grain prennent une sauce differente
+    - Ex : lundi sauce curry, mardi sauce tomate-basilic, mercredi soja-gingembre
+
+  SOUPER DU DIMANCHE : le premier assemblage, sert de diner Lundi.
+
+=====================================================
+SESSION 2 : MI-SEMAINE (optionnel, 30-45 min)
+=====================================================
+
+Planifier si : nouvelle proteine fraiche (poisson, oeufs), nouveaux legumes
+frais a cuire, ou lot de grains epuise. NE PAS recuire ce qui est deja pret.
+Recommande l'option A (tout dimanche) ou B (dimanche + mi-semaine) selon
+la complexite du menu.
 
 =====================================================
 OBJECTIF CALORIQUE ET MACRONUTRIMENTS
@@ -384,7 +407,8 @@ FORMAT JSON ATTENDU :
         "food_guide_check": {{"vegetables_pct": 50, "grains_pct": 25, "protein_pct": 25}}
       }},
       "dinner": {{
-        "name": "Curry de pois chiches au riz brun",
+        "name": "Bol curry de pois chiches au riz brun",
+        "prep_type": "cuisine",
         "portions_cooked": 2,
         "serves_next_day_lunch": true,
         "next_day_lunch_note": "-> Lundi diner (rechauffer 5 min)",
@@ -392,14 +416,14 @@ FORMAT JSON ATTENDU :
         "protein_sources": ["pois chiches"],
         "good_fats": ["huile d'olive"],
         "ingredients": [
-          {{"item": "Pois chiches (boite 540ml)", "store": "Super C", "qty": "2 x 540ml", "cost": 2.50}},
+          {{"item": "Pois chiches (boite 540ml)", "store": "Maxi", "qty": "2 x 540ml", "cost": 2.50}},
           {{"item": "Riz brun", "store": "garde-manger", "qty": "200g cru", "cost": 0.50}},
           {{"item": "Huile d'olive", "store": "garde-manger", "qty": "30ml", "cost": 0.40}}
         ],
         "cost": 3.40,
         "cost_per_portion": 1.70,
-        "note": "Cuisiner 2 portions — la 2e portion devient le diner de Lundi",
-        "macros": {{"protein_g": 32, "fat_g": 10, "carb_g": 55, "fiber_g": 14, "kcal": 460}},
+        "note": "SESSION 1 : cuisiner 2 portions — la 2e portion devient le diner de Lundi",
+        "macros": {{"protein_g": 42, "fat_g": 12, "carb_g": 70, "fiber_g": 14, "kcal": 560}},
         "food_guide_check": {{"vegetables_pct": 50, "grains_pct": 25, "protein_pct": 25}}
       }}
     }},
@@ -429,17 +453,26 @@ FORMAT JSON ATTENDU :
         "macros": {{"protein_g": 32, "fat_g": 10, "carb_g": 55, "fiber_g": 14, "kcal": 460}}
       }},
       "dinner": {{
-        "name": "...",
+        "name": "Bol poulet effiloche sauce soja-gingembre au quinoa",
+        "prep_type": "assemblage",
+        "assembly_components": ["poulet role pre-cuit (Dimanche)", "quinoa pre-cuit (Dimanche)", "epinards frais", "sauce soja-gingembre (5 min)"],
+        "prep_time_min": 8,
         "portions_cooked": 2,
         "serves_next_day_lunch": true,
         "next_day_lunch_note": "-> Mardi diner (rechauffer 5 min)",
-        "protein_type": "plant",
-        "protein_sources": ["..."],
-        "good_fats": ["..."],
-        "ingredients": ["..."],
-        "cost": 0.0,
-        "cost_per_portion": 0.0,
-        "macros": {{"protein_g": 0, "fat_g": 0, "carb_g": 0, "fiber_g": 0, "kcal": 0}},
+        "protein_type": "animal",
+        "protein_sources": ["poulet"],
+        "good_fats": ["sesame"],
+        "ingredients": [
+          {{"item": "Poulet role pre-cuit", "store": "pre-cuit Dimanche", "qty": "200g", "cost": 1.20}},
+          {{"item": "Quinoa pre-cuit", "store": "pre-cuit Dimanche", "qty": "180g", "cost": 0.40}},
+          {{"item": "Epinards frais", "store": "Maxi", "qty": "60g", "cost": 0.30}},
+          {{"item": "Sauce soja + gingembre", "store": "garde-manger", "qty": "30ml", "cost": 0.20}}
+        ],
+        "cost": 2.10,
+        "cost_per_portion": 1.05,
+        "note": "ASSEMBLAGE — aucune cuisson, composants pre-cuits du dimanche, sauce differente",
+        "macros": {{"protein_g": 45, "fat_g": 10, "carb_g": 65, "fiber_g": 6, "kcal": 540}},
         "food_guide_check": {{"vegetables_pct": 50, "grains_pct": 25, "protein_pct": 25}}
       }}
     }}

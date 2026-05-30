@@ -118,6 +118,8 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
             macros   = meal.get("macros", {})
 
             # Ligne titre du repas
+            prep_type = meal.get("prep_type", "")
+            assembly  = meal.get("assembly_components", [])
             if is_left:
                 src = meal.get("leftover_source", "souper precedent")
                 lines.append(f"  {label}: {name}")
@@ -125,7 +127,16 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
             else:
                 portions_tag = f"  [x{portions} portions]" if portions and portions > 1 else ""
                 cpp_str = f"  [{_p(cpp)}/portion]" if cpp is not None else ""
-                lines.append(f"  {label}: {name}{portions_tag}  (total {_p(cost)}{cpp_str})")
+                if prep_type == "assemblage":
+                    pmin = meal.get("prep_time_min", "")
+                    pmin_str = f"{pmin} min" if pmin else "<10 min"
+                    lines.append(f"  {label}: {name}  [ASSEMBLAGE {pmin_str}]  (total {_p(cost)}{cpp_str})")
+                elif prep_type == "cuisine":
+                    lines.append(f"  {label}: {name}  [CUISINE]{portions_tag}  (total {_p(cost)}{cpp_str})")
+                else:
+                    lines.append(f"  {label}: {name}{portions_tag}  (total {_p(cost)}{cpp_str})")
+            if assembly:
+                lines.append(f"    Composants : {' | '.join(assembly)}")
                 if next_day:
                     lines.append(f"    --> {next_day}")
 
