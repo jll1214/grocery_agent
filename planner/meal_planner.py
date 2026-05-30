@@ -147,10 +147,28 @@ Recommande l'option A (tout le dimanche) ou l'option B (dimanche + mi-semaine) s
 la complexite du menu et la presence de gros formats a ecouler.
 
 =====================================================
+OBJECTIF CALORIQUE ET MACRONUTRIMENTS
+=====================================================
+
+CIBLE : 2200 kcal/jour en moyenne (sur 7 jours).
+  Repartition cible par repas :
+    Dejeuner  : ~550 kcal
+    Diner     : ~700 kcal  (leftovers = idem souper veille)
+    Souper    : ~950 kcal  (portions x2, donc 1900 kcal cuisinaees au total)
+
+MACROS CIBLES (flexibles, ecart +/- 10% accepte) :
+    Glucides  : ~50% des kcal  (~275 g/jour)
+    Lipides   : ~20% des kcal  (~49 g/jour)
+    Proteines : ~30% des kcal  (~165 g/jour)
+  Ces pourcentages sont des guides, pas des contraintes rigides.
+  Privilegie la satiete, la variete et les aliments entiers.
+  Dans le JSON, rapporte les macros reelles calculees (pas les cibles).
+
+=====================================================
 REGLES NUTRITIONNELLES
 =====================================================
 
-1. PROTEINES : >= 20 g au dejeuner, >= 30 g au diner et au souper (valeurs FCEN).
+1. PROTEINES : >= 25 g au dejeuner, >= 40 g au diner et au souper (valeurs FCEN).
    Identifier clairement les sources de proteines dans chaque repas.
 
 2. VIANDE/POISSON : >= 1 repas par semaine. Prioriser les rabais circulaire.
@@ -160,6 +178,7 @@ REGLES NUTRITIONNELLES
 4. BONNES GRAISSES : noix au dejeuner, huile d'olive au diner/souper, poissons gras si en rabais.
 
 5. GLUCIDES COMPLEXES : riz brun, quinoa, avoine, pain de ble entier, patate douce.
+   Augmente les portions de grains pour atteindre la cible de 2200 kcal.
 
 6. GUIDE ALIMENTAIRE CANADIEN 2019 :
    50% assiette = legumes et fruits | 25% = grains entiers | 25% = proteines
@@ -428,9 +447,14 @@ FORMAT JSON ATTENDU :
   "weekly_nutrition_summary": {{
     "animal_protein_meals": 1,
     "plant_protein_meals": 5,
-    "avg_daily_protein_g": 92,
+    "avg_daily_protein_g": 165,
+    "avg_daily_fat_g": 49,
+    "avg_daily_carb_g": 275,
     "avg_daily_fiber_g": 35,
-    "avg_daily_kcal": 1850,
+    "avg_daily_kcal": 2200,
+    "protein_pct_kcal": 30,
+    "fat_pct_kcal": 20,
+    "carb_pct_kcal": 50,
     "meals_under_3_dollars_per_portion": 19,
     "leftover_lunches": 6,
     "total_unique_recipes": 8

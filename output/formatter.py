@@ -136,7 +136,7 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
             kcal    = macros.get("kcal")
             parts   = []
             if prot_g is not None:
-                target = 20 if meal_key == "breakfast" else 30
+                target = 25 if meal_key == "breakfast" else 40
                 flag   = " (!)" if (not is_left) and prot_g < target else ""
                 parts.append(f"prot {prot_g}g{flag}")
             if fat_g   is not None: parts.append(f"lip {fat_g}g")
@@ -174,14 +174,35 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
     weekly = plan.get("weekly_nutrition_summary", {})
     if weekly:
         _header(lines, "RESUME NUTRITIONNEL HEBDOMADAIRE")
+        kcal  = weekly.get("avg_daily_kcal", 0)
+        prot  = weekly.get("avg_daily_protein_g", 0)
+        fat   = weekly.get("avg_daily_fat_g", 0)
+        carb  = weekly.get("avg_daily_carb_g", 0)
+        fiber = weekly.get("avg_daily_fiber_g", 0)
+
+        # Calories avec écart vs cible 2200
+        kcal_flag = ""
+        if isinstance(kcal, (int, float)) and kcal > 0:
+            diff = kcal - 2200
+            kcal_flag = f"  ({'+' if diff >= 0 else ''}{diff:.0f} vs cible 2200)"
+        lines.append(f"  Calories moy./jour     : {kcal} kcal{kcal_flag}")
+
+        # Macros avec % des kcal calculé si possible
+        def _macro_pct(g: float, cal_per_g: float) -> str:
+            if not kcal or not isinstance(g, (int, float)) or g <= 0:
+                return ""
+            return f"  ({round(g * cal_per_g / kcal * 100)}% kcal)"
+
+        lines.append(f"  Glucides moy./jour     : {carb} g{_macro_pct(carb, 4)}  [cible ~50%]")
+        lines.append(f"  Lipides moy./jour      : {fat} g{_macro_pct(fat, 9)}  [cible ~20%]")
+        lines.append(f"  Proteines moy./jour    : {prot} g{_macro_pct(prot, 4)}  [cible ~30%]")
+        lines.append(f"  Fibres moy./jour       : {fiber} g")
+        lines.append("")
         lines.append(f"  Repas viande/poisson   : {weekly.get('animal_protein_meals', '?')}/semaine")
         lines.append(f"  Repas proteines vegetal: {weekly.get('plant_protein_meals', '?')}/semaine")
         lines.append(f"  Diners zero-prep       : {weekly.get('leftover_lunches', '?')}/7")
         lines.append(f"  Recettes uniques       : {weekly.get('total_unique_recipes', '?')}")
         lines.append(f"  Repas < 3.00$/portion  : {weekly.get('meals_under_3_dollars_per_portion', '?')}/21")
-        lines.append(f"  Proteines moy./jour    : {weekly.get('avg_daily_protein_g', '?')} g")
-        lines.append(f"  Fibres moy./jour       : {weekly.get('avg_daily_fiber_g', '?')} g")
-        lines.append(f"  Calories moy./jour     : {weekly.get('avg_daily_kcal', '?')} kcal")
         lines.append("")
 
     # ── Liste d'epicerie ──────────────────────────────────────────────────────
