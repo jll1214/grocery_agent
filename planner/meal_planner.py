@@ -123,13 +123,13 @@ SOUPER -> DINER DU LENDEMAIN (chaine ininterrompue) :
   Chaque souper est prepare EN DOUBLE PORTION (assemblage x2).
   Ce double DEVIENT AUTOMATIQUEMENT le diner du jour suivant (rechauffer 5 min).
 
-  Dimanche souper x2  [CUISINE]    -> Lundi diner     (leftover, 0 prep)
-  Lundi souper x2     [ASSEMBLAGE] -> Mardi diner     (leftover, 0 prep)
+  Dimanche souper x2  [CUISINE]    -> Lundi diner
+  Lundi souper x2     [ASSEMBLAGE] -> Mardi diner
   Mardi souper x2     [ASSEMBLAGE ou SESSION 2] -> Mercredi diner
   Mercredi souper x2  [ASSEMBLAGE ou SESSION 2] -> Jeudi diner
-  Jeudi souper x2     [ASSEMBLAGE] -> Vendredi diner  (leftover, 0 prep)
-  Vendredi souper x2  [ASSEMBLAGE] -> Samedi diner    (leftover, 0 prep)
-  Samedi souper       [ASSEMBLAGE] -> repas weekend (pas de doublement)
+  Jeudi souper x2     [ASSEMBLAGE] -> Vendredi diner
+  Vendredi souper x2  [ASSEMBLAGE] -> Samedi diner
+  Samedi souper x2    [ASSEMBLAGE] -> Dimanche diner (chaine continue)
 
 COUT DES REPAS LEFTOVER :
   Le diner-leftover a un cost = 0 $ et cost_per_portion = 0 $.
@@ -174,32 +174,29 @@ OBJECTIF CALORIQUE ET MACRONUTRIMENTS
 =====================================================
 
 CIBLE : 2200 kcal/jour en moyenne (sur 7 jours).
+REPAS PAR JOUR : 2 seulement — DINER (leftover) + SOUPER. Aucun dejeuner.
 
-  REPARTITION COHERENTE (le diner EST le leftover du souper — memes kcal) :
-    Dejeuner  : ~600 kcal par portion
-    Diner     : ~800 kcal par portion  (= exactement les kcal du souper de la veille)
-    Souper    : ~800 kcal par portion  (cuisine x2 = 1600 kcal total en cuisine)
-    Total/jour : ~600 + ~800 + ~800 = ~2200 kcal
+  REPARTITION (diner = leftover du souper de la veille = memes kcal) :
+    Diner   : ~1100 kcal par portion  (= souper de la veille)
+    Souper  : ~1100 kcal par portion  (cuisine x2 = 2200 kcal total en cuisine)
+    Total/jour : ~1100 + ~1100 = ~2200 kcal
 
-  TAILLES DE PORTIONS MINIMALES pour atteindre les cibles :
-    Dejeuner (~600 kcal) :
-      Option gruau : 100 g avoine seche (380 kcal) + 175 g yogourt grec (100 kcal)
-                     + 30 g noix/graines (170 kcal) + fruits = ~650 kcal
-      Option oeufs : 3 oeufs (235 kcal) + 2 tranches pain (140 kcal)
-                     + 30 g beurre arachide (188 kcal) + fruits = ~563 kcal
-    Souper (~800 kcal/portion, done 1600 kcal pour 2) :
-      200 g proteine cuite (300-400 kcal) + 300 g grain cuit (300-350 kcal)
-      + 200 g legumes (60-100 kcal) + 20 ml huile (180 kcal) + sauce (50 kcal)
-      = environ 900-1080 kcal pour 2 portions = 450-540 kcal/portion
-      -> Augmenter le grain a 400 g cuit et la proteine a 250 g si necessaire.
+  TAILLES DE PORTIONS MINIMALES pour atteindre 1100 kcal/portion :
+    300 g proteine cuite  (450-500 kcal)
+    + 400 g grain cuit    (400-450 kcal)
+    + 200 g legumes       (60-100 kcal)
+    + 25 ml huile         (220 kcal)
+    + sauce/condiments    (50-100 kcal)
+    = ~1180-1370 kcal pour 2 portions = ~590-685 kcal/portion
+    -> Augmenter grain a 500 g et proteine a 350 g pour atteindre 1100 kcal.
+    -> Ajouter des bonnes graisses (noix, avocat) pour atteindre la cible.
 
   VALIDATION OBLIGATOIRE AVANT DE PRODUIRE LE JSON :
-    Pour chaque journee, calcule mentalement :
-      breakfast.kcal + lunch.kcal + dinner.kcal doit etre entre 1900 et 2400 kcal.
-    Si une journee est en dehors de cette fourchette, augmente les portions.
+    Pour chaque journee : lunch.kcal + dinner.kcal doit etre entre 1900 et 2500 kcal.
+    Si une journee est en dehors, augmente les portions du souper.
     Le champ weekly_nutrition_summary.avg_daily_kcal DOIT etre la moyenne
-    arithmetique reelle des 7 totaux journaliers calcules depuis les macros
-    individuelles. INTERDIT de fabriquer ce nombre.
+    arithmetique reelle des 7 totaux journaliers (lunch + dinner seulement).
+    INTERDIT de fabriquer ce nombre.
 
 MACROS CIBLES (flexibles, ecart +/- 10% accepte) :
     Glucides  : ~50% des kcal  (~275 g/jour)
@@ -212,8 +209,9 @@ MACROS CIBLES (flexibles, ecart +/- 10% accepte) :
 REGLES NUTRITIONNELLES
 =====================================================
 
-1. PROTEINES : >= 25 g au dejeuner, >= 40 g au diner et au souper (valeurs FCEN).
+1. PROTEINES : >= 55 g au diner et au souper (valeurs FCEN) pour atteindre ~110 g/jour.
    Identifier clairement les sources de proteines dans chaque repas.
+   Aucun dejeuner — seulement diner (leftover) et souper.
 
 2. VIANDE/POISSON : >= 1 repas par semaine. Prioriser les rabais circulaire.
 
@@ -368,10 +366,11 @@ INSTRUCTIONS :
 
 1. STRUCTURE : Planifie 7 jours en commencant par le Dimanche (Jour 1).
    Jour 1=Dimanche, Jour 2=Lundi, ..., Jour 6=Vendredi, Jour 7=Samedi.
+   SEULEMENT 2 REPAS PAR JOUR : diner (leftover) + souper. Pas de dejeuner.
 
 2. COOK ONCE : Chaque souper est cuisine x2 portions.
    Le souper du Jour N DEVIENT le diner du Jour N+1 (leftover, 0 $ de cout).
-   EXCEPTION : le souper du Samedi (Jour 7) n'est pas double.
+   Samedi souper x2 -> Dimanche diner (chaine complete 7 jours).
 
 3. BATCH COOKING : Definis la session du Dimanche avec une liste de taches
    ordonnees (quoi cuisiner, en quelle quantite, pour combien de jours).
@@ -402,7 +401,8 @@ FORMAT JSON ATTENDU :
       "Mardi souper x2 -> Mercredi diner",
       "Mercredi souper x2 -> Jeudi diner",
       "Jeudi souper x2 -> Vendredi diner",
-      "Vendredi souper x2 -> Samedi diner"
+      "Vendredi souper x2 -> Samedi diner",
+      "Samedi souper x2 -> Dimanche diner"
     ]
   }},
   "cooking_schedule": {{
@@ -447,19 +447,6 @@ FORMAT JSON ATTENDU :
       "day": 1,
       "day_name": "Dimanche",
       "is_batch_cooking_day": true,
-      "breakfast": {{
-        "name": "Gruau proteines aux noix",
-        "protein_sources": ["yogourt grec", "graines de chia"],
-        "good_fats": ["amandes"],
-        "ingredients": [
-          {{"item": "Flocons d'avoine", "store": "garde-manger", "qty": "80g", "cost": 0.25}},
-          {{"item": "Yogourt grec 2%", "store": "Metro", "qty": "175g", "cost": 0.85}},
-          {{"item": "Amandes", "store": "Costco", "qty": "30g", "cost": 0.45}}
-        ],
-        "cost": 1.55,
-        "cost_per_portion": 1.55,
-        "macros": {{"protein_g": 22, "fat_g": 12, "carb_g": 35, "fiber_g": 6, "kcal": 340}}
-      }},
       "lunch": {{
         "name": "Soupe aux lentilles (preparee lors du batch)",
         "protein_sources": ["lentilles"],
@@ -498,15 +485,6 @@ FORMAT JSON ATTENDU :
       "day": 2,
       "day_name": "Lundi",
       "is_batch_cooking_day": false,
-      "breakfast": {{
-        "name": "...",
-        "protein_sources": ["..."],
-        "good_fats": ["..."],
-        "ingredients": ["..."],
-        "cost": 0.0,
-        "cost_per_portion": 0.0,
-        "macros": {{"protein_g": 0, "fat_g": 0, "carb_g": 0, "fiber_g": 0, "kcal": 0}}
-      }},
       "lunch": {{
         "name": "Curry de pois chiches (reste du souper Dimanche)",
         "is_leftover": true,

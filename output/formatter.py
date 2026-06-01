@@ -8,9 +8,8 @@ from __future__ import annotations
 from typing import Any
 
 _MEAL_LABELS = {
-    "breakfast": "Dejeuner",
-    "lunch":     "Diner   ",
-    "dinner":    "Souper  ",
+    "lunch":  "Diner  ",
+    "dinner": "Souper ",
 }
 
 
@@ -147,7 +146,7 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
             kcal    = macros.get("kcal")
             parts   = []
             if prot_g is not None:
-                target = 25 if meal_key == "breakfast" else 40
+                target = 55
                 flag   = " (!)" if (not is_left) and prot_g < target else ""
                 parts.append(f"prot {prot_g}g{flag}")
             if fat_g   is not None: parts.append(f"lip {fat_g}g")
@@ -195,7 +194,7 @@ def format_grocery_list(plan: dict[str, Any]) -> str:
         real_daily: list[float] = []
         for day_data in plan.get("meal_plan", []):
             day_total = 0.0
-            for meal_key in ("breakfast", "lunch", "dinner"):
+            for meal_key in ("lunch", "dinner"):
                 m = day_data.get(meal_key, {})
                 k = m.get("macros", {}).get("kcal")
                 if isinstance(k, (int, float)):
